@@ -6,8 +6,10 @@ use App\Livewire\Availability;
 use App\Livewire\Calendar;
 use App\Livewire\Clients;
 use App\Livewire\Dashboard;
+use App\Livewire\Exercises;
 use App\Livewire\Services;
 use App\Livewire\Settings;
+use App\Livewire\WorkoutPlans;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -27,6 +29,11 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::livewire('/clients/{client}/edit', Clients\Edit::class)->name('clients.edit');
 
     Route::livewire('/services', Services\Index::class)->name('services.index');
+
+    Route::livewire('/exercises', Exercises\Index::class)->name('exercises.index');
+
+    Route::livewire('/workout-plans', WorkoutPlans\Index::class)->name('workout-plans.index');
+    Route::livewire('/workout-plans/{plan}', WorkoutPlans\Edit::class)->name('workout-plans.edit');
 
     Route::livewire('/availability', Availability\Index::class)->name('availability.index');
 

@@ -1,6 +1,6 @@
 @php
     $profile = $client->clientProfile;
-    $tabs = ['details' => 'Στοιχεία', 'bookings' => 'Ραντεβού'];
+    $tabs = ['details' => 'Στοιχεία', 'bookings' => 'Ραντεβού', 'workouts' => 'Προπόνηση'];
 @endphp
 
 <div>
@@ -115,6 +115,51 @@
                     </div>
                 @empty
                     <p class="px-5 py-6 text-center text-sm text-zinc-500">Δεν υπάρχει ιστορικό.</p>
+                @endforelse
+            </x-ui.card>
+        </div>
+    @endif
+
+    @if ($tab === 'workouts')
+        <div class="space-y-6">
+            <x-ui.card title="Νέο πρόγραμμα προπόνησης">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+                    @if ($this->planTemplates->isNotEmpty())
+                        <form wire:submit="assignTemplate" class="flex flex-1 flex-col gap-2 sm:flex-row sm:items-start">
+                            <x-ui.select wire:model="templateId" placeholder="— Από πρότυπο —" class="flex-1" aria-label="Πρότυπο">
+                                @foreach ($this->planTemplates as $template)
+                                    <option value="{{ $template->id }}">{{ $template->name }}</option>
+                                @endforeach
+                            </x-ui.select>
+                            <x-ui.button type="submit">Ανάθεση</x-ui.button>
+                        </form>
+                        <span class="self-center text-sm text-zinc-400">ή</span>
+                    @endif
+                    <x-ui.button variant="secondary" icon="plus" wire:click="createEmptyPlan">Κενό πρόγραμμα</x-ui.button>
+                </div>
+            </x-ui.card>
+
+            <x-ui.card title="Προγράμματα" :padding="false">
+                @forelse ($this->workoutPlans as $plan)
+                    <div wire:key="workout-plan-{{ $plan->id }}" class="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3 last:border-0">
+                        <a href="{{ route('workout-plans.edit', $plan) }}" wire:navigate class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 font-medium hover:text-emerald-700">
+                                {{ $plan->name }}
+                                @if ($plan->is_active)
+                                    <x-ui.badge color="emerald">Ενεργό</x-ui.badge>
+                                @endif
+                            </div>
+                            <div class="text-sm text-zinc-500">
+                                {{ $plan->days_count }} {{ $plan->days_count === 1 ? 'ημέρα' : 'ημέρες' }}
+                                @if ($plan->assigned_at) · από {{ $plan->assigned_at->format('d/m/Y') }} @endif
+                            </div>
+                        </a>
+                        @unless ($plan->is_active)
+                            <x-ui.button variant="ghost" size="sm" wire:click="activatePlan({{ $plan->id }})">Ενεργοποίηση</x-ui.button>
+                        @endunless
+                    </div>
+                @empty
+                    <p class="px-5 py-6 text-center text-sm text-zinc-500">Δεν έχει πρόγραμμα προπόνησης.</p>
                 @endforelse
             </x-ui.card>
         </div>

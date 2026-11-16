@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Service;
 use App\Models\TrainingSession;
 use App\Models\User;
+use App\Models\WorkoutPlan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -46,6 +47,41 @@ class ShowTest extends TestCase
 
         $this->assertSame(['completed' => 1], $component->instance()->attendance);
         $this->assertCount(1, $component->instance()->upcomingBookings);
+    }
+
+    public function test_workouts_tab_assigns_a_template(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $client = User::factory()->client($admin)->create();
+        $template = WorkoutPlan::factory()->for($admin, 'trainer')->create(['name' => 'Πρότυπο Α']);
+
+        Livewire::actingAs($admin)
+            ->test(Show::class, ['client' => $client])
+            ->set('tab', 'workouts')
+            ->assertSee('Πρότυπο Α')
+            ->set('templateId', $template->id)
+            ->call('assignTemplate')
+            ->assertRedirect();
+
+        $this->assertSame(1, WorkoutPlan::query()->where('client_id', $client->id)->count());
+    }
+
+    public function test_workouts_tab_creates_empty_plan_and_switches_active_plan(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $client = User::factory()->client($admin)->create();
+        $older = WorkoutPlan::factory()->for($admin, 'trainer')->forClient($client)->create(['is_active' => false]);
+
+        $component = Livewire::actingAs($admin)->test(Show::class, ['client' => $client]);
+        $component->call('createEmptyPlan')->assertRedirect();
+
+        $newPlan = WorkoutPlan::query()->where('client_id', $client->id)->where('is_active', true)->sole();
+        $this->assertSame(1, $newPlan->days()->count());
+
+        $component->call('activatePlan', $older->id);
+
+        $this->assertTrue($older->refresh()->is_active);
+        $this->assertFalse($newPlan->refresh()->is_active);
     }
 
     public function test_trainer_cannot_view_another_trainers_client(): void
