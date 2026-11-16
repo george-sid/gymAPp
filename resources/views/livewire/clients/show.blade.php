@@ -1,6 +1,6 @@
 @php
     $profile = $client->clientProfile;
-    $tabs = ['details' => 'Στοιχεία', 'bookings' => 'Ραντεβού', 'workouts' => 'Προπόνηση'];
+    $tabs = ['details' => 'Στοιχεία', 'bookings' => 'Ραντεβού', 'workouts' => 'Προπόνηση', 'measurements' => 'Μετρήσεις'];
 @endphp
 
 <div>
@@ -118,6 +118,10 @@
                 @endforelse
             </x-ui.card>
         </div>
+    @endif
+
+    @if ($tab === 'measurements')
+        <livewire:clients.measurements :client="$client" wire:key="measurements-{{ $client->id }}" />
     @endif
 
     @if ($tab === 'workouts')

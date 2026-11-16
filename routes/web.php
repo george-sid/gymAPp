@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\MeasurementPhotoController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Availability;
 use App\Livewire\Calendar;
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::livewire('/clients/create', Clients\Edit::class)->name('clients.create');
     Route::livewire('/clients/{client}', Clients\Show::class)->name('clients.show');
     Route::livewire('/clients/{client}/edit', Clients\Edit::class)->name('clients.edit');
+    Route::get('/measurement-photos/{photo}', MeasurementPhotoController::class)->name('measurement-photos.show');
 
     Route::livewire('/services', Services\Index::class)->name('services.index');
 
