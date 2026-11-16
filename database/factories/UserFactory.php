@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -27,10 +28,42 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->numerify('69########'),
+            'role' => UserRole::Client,
+            'is_active' => true,
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => null,
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * A trainer account that owns the admin panel.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Admin,
+            'password' => static::$password ??= Hash::make('password'),
+        ]);
+    }
+
+    /**
+     * A co-trainer account with access to the admin panel.
+     */
+    public function trainer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => UserRole::Trainer,
+            'password' => static::$password ??= Hash::make('password'),
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
     }
 
     /**
