@@ -6,6 +6,7 @@
         <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name') }}</title>
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="min-h-screen bg-zinc-50 font-sans text-zinc-900 antialiased">
         <div x-data="{ sidebarOpen: false }" class="min-h-screen lg:pl-64">
@@ -29,6 +30,7 @@
 
                 <nav class="flex-1 space-y-1 overflow-y-auto p-3">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="home">Αρχική</x-nav-link>
+                    <x-nav-link :href="route('calendar')" :active="request()->routeIs('calendar')" icon="calendar">Ημερολόγιο</x-nav-link>
                     <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')" icon="users">Πελάτες</x-nav-link>
                     <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')" icon="clipboard">Προγράμματα</x-nav-link>
                     <x-nav-link :href="route('availability.index')" :active="request()->routeIs('availability.*')" icon="clock">Διαθεσιμότητα</x-nav-link>
@@ -66,5 +68,7 @@
         </div>
 
         <x-toast />
+
+        @livewireScriptConfig
     </body>
 </html>

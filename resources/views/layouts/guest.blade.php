@@ -6,6 +6,7 @@
         <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name') }}</title>
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
     </head>
     <body class="min-h-screen bg-zinc-100 font-sans text-zinc-900 antialiased">
         <main class="flex min-h-screen items-center justify-center px-4 py-12">
@@ -18,5 +19,7 @@
                 {{ $slot }}
             </div>
         </main>
+
+        @livewireScriptConfig
     </body>
 </html>

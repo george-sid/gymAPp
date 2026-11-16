@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LogoutController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Availability;
+use App\Livewire\Calendar;
 use App\Livewire\Clients;
 use App\Livewire\Dashboard;
 use App\Livewire\Services;
@@ -17,6 +18,8 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::post('/logout', LogoutController::class)->name('logout');
 
     Route::livewire('/', Dashboard::class)->name('dashboard');
+
+    Route::livewire('/calendar', Calendar\Index::class)->name('calendar');
 
     Route::livewire('/clients', Clients\Index::class)->name('clients.index');
     Route::livewire('/clients/create', Clients\Edit::class)->name('clients.create');

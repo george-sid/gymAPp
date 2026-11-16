@@ -11,3 +11,43 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* FullCalendar */
+.fc {
+    --fc-border-color: var(--color-zinc-200);
+    --fc-today-bg-color: color-mix(in oklab, var(--color-emerald-50) 60%, transparent);
+    --fc-now-indicator-color: var(--color-red-500);
+    --fc-button-bg-color: var(--color-white);
+    --fc-button-text-color: var(--color-zinc-700);
+    --fc-button-border-color: var(--color-zinc-300);
+    --fc-button-hover-bg-color: var(--color-zinc-100);
+    --fc-button-hover-border-color: var(--color-zinc-300);
+    --fc-button-active-bg-color: var(--color-emerald-600);
+    --fc-button-active-border-color: var(--color-emerald-600);
+    --fc-non-business-color: color-mix(in oklab, var(--color-zinc-100) 70%, transparent);
+    font-size: 0.875rem;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.fc .fc-button {
+    font-size: 0.8125rem;
+    text-transform: none;
+    box-shadow: none !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+    color: var(--color-white);
+}
+
+.fc .fc-event {
+    cursor: pointer;
+}
+
+.fc .fc-event-cancelled {
+    opacity: 0.45;
+    text-decoration: line-through;
+}
