@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LogoutController;
 use App\Livewire\Auth\Login;
+use App\Livewire\Clients;
 use App\Livewire\Dashboard;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +14,9 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::post('/logout', LogoutController::class)->name('logout');
 
     Route::livewire('/', Dashboard::class)->name('dashboard');
+
+    Route::livewire('/clients', Clients\Index::class)->name('clients.index');
+    Route::livewire('/clients/create', Clients\Edit::class)->name('clients.create');
+    Route::livewire('/clients/{client}', Clients\Show::class)->name('clients.show');
+    Route::livewire('/clients/{client}/edit', Clients\Edit::class)->name('clients.edit');
 });

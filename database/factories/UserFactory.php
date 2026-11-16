@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\UserRole;
+use App\Models\ClientProfile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -57,6 +58,17 @@ class UserFactory extends Factory
             'role' => UserRole::Trainer,
             'password' => static::$password ??= Hash::make('password'),
         ]);
+    }
+
+    /**
+     * A client with a profile, assigned to the given trainer (or a new admin).
+     */
+    public function client(?User $trainer = null): static
+    {
+        return $this->has(
+            ClientProfile::factory()->state(fn () => ['trainer_id' => $trainer?->id ?? User::factory()->admin()]),
+            'clientProfile',
+        );
     }
 
     public function inactive(): static

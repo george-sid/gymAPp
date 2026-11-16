@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -37,6 +38,49 @@ class User extends Authenticatable
     public function isStaff(): bool
     {
         return $this->role->isStaff();
+    }
+
+    /**
+     * @return HasOne<ClientProfile, $this>
+     */
+    public function clientProfile(): HasOne
+    {
+        return $this->hasOne(ClientProfile::class);
+    }
+
+    /**
+     * Clients the given staff member is allowed to see.
+     *
+     * @param  Builder<User>  $query
+     */
+    #[Scope]
+    protected function visibleTo(Builder $query, User $staff): void
+    {
+        if ($staff->role === UserRole::Admin) {
+            return;
+        }
+
+        $query->whereHas('clientProfile', fn (Builder $profile) => $profile->where('trainer_id', $staff->id));
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     */
+    #[Scope]
+    protected function search(Builder $query, ?string $term): void
+    {
+        $term = trim((string) $term);
+
+        if ($term === '') {
+            return;
+        }
+
+        $like = '%'.addcslashes($term, '%_\\').'%';
+
+        $query->where(fn (Builder $inner) => $inner
+            ->where('name', 'like', $like)
+            ->orWhere('email', 'like', $like)
+            ->orWhere('phone', 'like', $like));
     }
 
     /**
