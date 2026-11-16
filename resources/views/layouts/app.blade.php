@@ -31,6 +31,8 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="home">Αρχική</x-nav-link>
                     <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')" icon="users">Πελάτες</x-nav-link>
                     <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')" icon="clipboard">Προγράμματα</x-nav-link>
+                    <x-nav-link :href="route('availability.index')" :active="request()->routeIs('availability.*')" icon="clock">Διαθεσιμότητα</x-nav-link>
+                    <x-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.*')" icon="settings">Ρυθμίσεις</x-nav-link>
                 </nav>
 
                 <div class="border-t border-zinc-200 p-3">

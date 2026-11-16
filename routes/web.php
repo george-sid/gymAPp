@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Auth\LogoutController;
 use App\Livewire\Auth\Login;
+use App\Livewire\Availability;
 use App\Livewire\Clients;
 use App\Livewire\Dashboard;
 use App\Livewire\Services;
+use App\Livewire\Settings;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -22,4 +24,8 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::livewire('/clients/{client}/edit', Clients\Edit::class)->name('clients.edit');
 
     Route::livewire('/services', Services\Index::class)->name('services.index');
+
+    Route::livewire('/availability', Availability\Index::class)->name('availability.index');
+
+    Route::livewire('/settings', Settings\Index::class)->name('settings.index');
 });
