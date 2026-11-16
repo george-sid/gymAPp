@@ -30,6 +30,7 @@
                 <nav class="flex-1 space-y-1 overflow-y-auto p-3">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="home">Αρχική</x-nav-link>
                     <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')" icon="users">Πελάτες</x-nav-link>
+                    <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')" icon="clipboard">Προγράμματα</x-nav-link>
                 </nav>
 
                 <div class="border-t border-zinc-200 p-3">
