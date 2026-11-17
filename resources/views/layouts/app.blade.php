@@ -41,10 +41,17 @@
                 </nav>
 
                 <div class="border-t border-zinc-200 p-3">
-                    <div class="px-3 pb-2 text-sm">
+                    <a
+                        href="{{ route('profile.edit') }}"
+                        wire:navigate
+                        @class([
+                            'mb-1 block rounded-lg px-3 py-2 text-sm hover:bg-zinc-100',
+                            'bg-emerald-50' => request()->routeIs('profile.*'),
+                        ])
+                    >
                         <div class="font-medium">{{ auth()->user()->name }}</div>
-                        <div class="text-zinc-500">{{ auth()->user()->role->label() }}</div>
-                    </div>
+                        <div class="text-zinc-500">{{ auth()->user()->role->label() }} · Προφίλ</div>
+                    </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900">

@@ -9,6 +9,7 @@ use App\Livewire\Clients;
 use App\Livewire\Dashboard;
 use App\Livewire\Exercises;
 use App\Livewire\Packages;
+use App\Livewire\Profile;
 use App\Livewire\Services;
 use App\Livewire\Settings;
 use App\Livewire\WorkoutPlans;
@@ -42,4 +43,6 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::livewire('/availability', Availability\Index::class)->name('availability.index');
 
     Route::livewire('/settings', Settings\Index::class)->name('settings.index');
+
+    Route::livewire('/profile', Profile\Edit::class)->name('profile.edit');
 });
