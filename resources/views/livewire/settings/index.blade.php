@@ -12,6 +12,10 @@
             <x-ui.input wire:model="free_cancellation_hours" type="number" min="0" label="Δωρεάν ακύρωση έως (ώρες πριν)" hint="Αργότερα ακύρωση ή no-show χρεώνεται τη συνεδρία." />
             <x-ui.input wire:model="reminder_hours_before" type="number" min="1" label="Υπενθύμιση με email (ώρες πριν)" />
         </div>
+
+        <div class="mt-4">
+            <x-ui.checkbox wire:model="notify_clients" label="Email στον πελάτη όταν μετακινώ ή ακυρώνω ραντεβού" />
+        </div>
     </x-ui.card>
 
     <x-ui.card title="Στοιχεία γυμναστηρίου">

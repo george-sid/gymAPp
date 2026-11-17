@@ -3,6 +3,7 @@
 namespace App\Actions\Calendar;
 
 use App\Enums\BookingStatus;
+use App\Events\TrainingSessionRescheduled;
 use App\Exceptions\BookingException;
 use App\Models\Booking;
 use App\Models\TrainingSession;
@@ -39,7 +40,15 @@ class MoveTrainingSession
             $this->ensureTrainerIsFree->handle($session->trainer_id, $startsAt, $endsAt, $session->id);
             $this->ensureClientsAreFree($session, $startsAt, $endsAt);
 
+            $previousStartsAt = $session->starts_at;
             $session->update(['starts_at' => $startsAt, 'ends_at' => $endsAt]);
+
+            if (! $previousStartsAt->equalTo($startsAt)) {
+                // A new time needs a new reminder.
+                $session->bookings()->update(['reminder_sent_at' => null]);
+
+                TrainingSessionRescheduled::dispatch($session, $previousStartsAt);
+            }
 
             return $session;
         });

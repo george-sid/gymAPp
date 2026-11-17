@@ -3,6 +3,7 @@
 namespace App\Actions\Calendar;
 
 use App\Enums\BookingStatus;
+use App\Events\BookingCancelled;
 use App\Exceptions\BookingException;
 use App\Models\Booking;
 use App\Models\BookingStatusChange;
@@ -55,6 +56,10 @@ class ChangeBookingStatus
                 'to_status' => $to,
                 'changed_by' => $actor->id,
             ]);
+
+            if ($to === BookingStatus::Cancelled) {
+                BookingCancelled::dispatch($booking);
+            }
 
             return $booking;
         });

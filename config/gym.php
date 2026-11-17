@@ -20,6 +20,7 @@ return [
         'max_advance_days' => 30,
         'free_cancellation_hours' => 12,
         'reminder_hours_before' => 24,
+        'notify_clients' => true,
 
         // Gym details (used in emails)
         'gym_name' => env('APP_NAME', 'GymApp'),

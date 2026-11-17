@@ -30,6 +30,8 @@ class Index extends Component
 
     public string $gym_email = '';
 
+    public bool $notify_clients = true;
+
     public function mount(Settings $settings): void
     {
         foreach ($settings->all() as $key => $value) {
@@ -48,6 +50,7 @@ class Index extends Component
             'max_advance_days' => ['required', 'integer', 'min:1', 'max:365'],
             'free_cancellation_hours' => ['required', 'integer', 'min:0', 'max:168'],
             'reminder_hours_before' => ['required', 'integer', 'min:1', 'max:168'],
+            'notify_clients' => ['boolean'],
             'gym_name' => ['required', 'string', 'max:255'],
             'gym_address' => ['nullable', 'string', 'max:255'],
             'gym_phone' => ['nullable', 'string', 'max:30'],
@@ -68,7 +71,11 @@ class Index extends Component
         $integerKeys = ['buffer_minutes', 'slot_interval_minutes', 'min_notice_hours', 'max_advance_days', 'free_cancellation_hours', 'reminder_hours_before'];
 
         foreach ($validated as $key => $value) {
-            $validated[$key] = in_array($key, $integerKeys, true) ? (int) $value : ($value === '' ? null : $value);
+            $validated[$key] = match (true) {
+                in_array($key, $integerKeys, true) => (int) $value,
+                is_bool($value) => $value,
+                default => $value === '' ? null : $value,
+            };
         }
 
         $settings->set($validated);
