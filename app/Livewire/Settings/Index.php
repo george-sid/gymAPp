@@ -10,17 +10,17 @@ use Livewire\Component;
 #[Title('Ρυθμίσεις')]
 class Index extends Component
 {
-    public int|string $buffer_minutes = '';
+    public int|string|null $buffer_minutes = '';
 
-    public int|string $slot_interval_minutes = '';
+    public int|string|null $slot_interval_minutes = '';
 
-    public int|string $min_notice_hours = '';
+    public int|string|null $min_notice_hours = '';
 
-    public int|string $max_advance_days = '';
+    public int|string|null $max_advance_days = '';
 
-    public int|string $free_cancellation_hours = '';
+    public int|string|null $free_cancellation_hours = '';
 
-    public int|string $reminder_hours_before = '';
+    public int|string|null $reminder_hours_before = '';
 
     public string $gym_name = '';
 

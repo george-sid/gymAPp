@@ -2,6 +2,7 @@
 
 namespace App\Actions\Calendar;
 
+use App\Actions\Packages\ApplyBookingCharge;
 use App\Enums\BookingStatus;
 use App\Events\BookingCancelled;
 use App\Exceptions\BookingException;
@@ -12,11 +13,13 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Moves a booking to another status (confirm, complete, no-show, cancel, restore)
- * and records who did it.
+ * Moves a booking to another status (confirm, complete, no-show, cancel, restore),
+ * records who did it and charges or refunds the package session accordingly.
  */
 class ChangeBookingStatus
 {
+    public function __construct(private ApplyBookingCharge $applyBookingCharge) {}
+
     public function handle(Booking $booking, BookingStatus $to, User $actor): Booking
     {
         return DB::transaction(function () use ($booking, $to, $actor): Booking {
@@ -56,6 +59,8 @@ class ChangeBookingStatus
                 'to_status' => $to,
                 'changed_by' => $actor->id,
             ]);
+
+            $this->applyBookingCharge->handle($booking->setRelation('trainingSession', $session));
 
             if ($to === BookingStatus::Cancelled) {
                 BookingCancelled::dispatch($booking);

@@ -38,6 +38,15 @@ class IndexTest extends TestCase
         $this->assertSame('0302101234567', $settings->get('gym_phone'));
     }
 
+    public function test_cleared_number_field_shows_required_error(): void
+    {
+        Livewire::actingAs(User::factory()->admin()->create())
+            ->test(Index::class)
+            ->set('buffer_minutes', '')
+            ->call('save')
+            ->assertHasErrors(['buffer_minutes' => 'required']);
+    }
+
     public function test_rejects_invalid_values(): void
     {
         Livewire::actingAs(User::factory()->admin()->create())

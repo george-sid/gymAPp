@@ -5,7 +5,7 @@
         add(message, type = 'success') {
             const id = Date.now() + Math.random();
             this.toasts.push({ id, message, type });
-            setTimeout(() => this.toasts = this.toasts.filter(t => t.id !== id), 4000);
+            setTimeout(() => this.toasts = this.toasts.filter(t => t.id !== id), type === 'success' ? 4000 : 8000);
         },
     }"
     x-init="@if (session('status')) add(@js(session('status'))) @endif"
@@ -16,7 +16,7 @@
         <div
             x-transition
             class="pointer-events-auto w-full max-w-sm rounded-lg px-4 py-3 text-sm font-medium text-white shadow-lg"
-            x-bind:class="toast.type === 'error' ? 'bg-red-600' : 'bg-zinc-900'"
+            x-bind:class="{ 'bg-red-600': toast.type === 'error', 'bg-amber-600': toast.type === 'warning', 'bg-zinc-900': toast.type === 'success' }"
             x-text="toast.message"
         ></div>
     </template>

@@ -72,6 +72,18 @@ class IndexTest extends TestCase
             ]);
     }
 
+    public function test_cleared_number_fields_show_required_errors(): void
+    {
+        Livewire::actingAs(User::factory()->admin()->create())
+            ->test(Index::class)
+            ->call('create')
+            ->set('form.name', 'Personal')
+            ->set('form.duration_min', '')
+            ->set('form.capacity', '')
+            ->call('save')
+            ->assertHasErrors(['form.duration_min' => 'required', 'form.capacity' => 'required']);
+    }
+
     public function test_updates_service_and_replaces_old_image(): void
     {
         Storage::fake('public');

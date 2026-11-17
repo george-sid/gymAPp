@@ -15,11 +15,11 @@ class ServiceForm extends Form
 
     public string $description = '';
 
-    public int|string $duration_min = 60;
+    public int|string|null $duration_min = 60;
 
     public string $price = '';
 
-    public int|string $capacity = 1;
+    public int|string|null $capacity = 1;
 
     public string $color = '#059669';
 

@@ -8,6 +8,8 @@ use App\Actions\Calendar\CreateBooking;
 use App\Actions\Calendar\GetAvailableSlots;
 use App\Actions\Calendar\MoveTrainingSession;
 use App\Actions\Calendar\ScheduleSessions;
+use App\Actions\Packages\GetClientAccount;
+use App\Actions\Packages\WaiveBookingCharge;
 use App\Enums\AvailabilityExceptionType;
 use App\Enums\BookingStatus;
 use App\Enums\CalendarEventType;
@@ -47,7 +49,7 @@ class Index extends Component
 
     public string $time = '';
 
-    public int|string $weeks = 1;
+    public int|string|null $weeks = 1;
 
     public string $notes = '';
 
@@ -183,6 +185,10 @@ class Index extends Component
         $created = count($result['created']);
         $this->dispatch('notify', message: $created === 1 ? 'Το ραντεβού κλείστηκε.' : "Κλείστηκαν {$created} ραντεβού.");
 
+        if ($this->clientId) {
+            $this->warnAboutPackageBalance(User::query()->findOrFail($this->clientId));
+        }
+
         if ($result['skipped'] !== []) {
             $this->skipped = $result['skipped'];
 
@@ -272,15 +278,17 @@ class Index extends Component
             return null;
         }
 
-        return $this->findSession($this->sessionId)->load(['service', 'bookings' => fn ($query) => $query->with('client')->orderBy('booked_at')]);
+        return $this->findSession($this->sessionId)->load(['service', 'bookings' => fn ($query) => $query->with(['client', 'clientPackage'])->orderBy('booked_at')]);
     }
 
     public function addClientToSession(CreateBooking $createBooking): void
     {
         $this->validate(['addClientId' => ['required', Rule::in($this->clients->modelKeys())]], attributes: ['addClientId' => 'πελάτης']);
 
+        $client = User::query()->findOrFail($this->addClientId);
+
         try {
-            $createBooking->handle($this->findSession((int) $this->sessionId), User::query()->findOrFail($this->addClientId), auth()->user());
+            $createBooking->handle($this->findSession((int) $this->sessionId), $client, auth()->user());
         } catch (BookingException $exception) {
             throw ValidationException::withMessages(['addClientId' => $exception->getMessage()]);
         }
@@ -288,6 +296,38 @@ class Index extends Component
         $this->addClientId = null;
         unset($this->selectedSession);
         $this->dispatch('calendar-refresh');
+        $this->warnAboutPackageBalance($client);
+    }
+
+    /**
+     * Marks everyone still booked in the open session as attended (uses a package session each).
+     */
+    public function completeAll(ChangeBookingStatus $changeBookingStatus): void
+    {
+        $session = $this->findSession((int) $this->sessionId);
+
+        $session->bookings()
+            ->whereIn('status', [BookingStatus::Pending, BookingStatus::Confirmed])
+            ->get()
+            ->each(fn (Booking $booking) => $changeBookingStatus->handle($booking, BookingStatus::Completed, auth()->user()));
+
+        unset($this->selectedSession);
+        $this->dispatch('calendar-refresh');
+        $this->dispatch('notify', message: 'Σημειώθηκαν ως ολοκληρωμένα.');
+    }
+
+    /**
+     * Forgives a charged session (e.g. late cancellation) or charges it again.
+     */
+    public function toggleWaive(int $bookingId, WaiveBookingCharge $waiveBookingCharge): void
+    {
+        $booking = Booking::query()
+            ->where('training_session_id', $this->findSession((int) $this->sessionId)->id)
+            ->findOrFail($bookingId);
+
+        $waiveBookingCharge->handle($booking, ! $booking->charge_waived);
+
+        unset($this->selectedSession);
     }
 
     public function setBookingStatus(int $bookingId, string $status, ChangeBookingStatus $changeBookingStatus): void
@@ -450,6 +490,13 @@ class Index extends Component
                         'backgroundColor' => '#fecaca',
                     ]);
             });
+    }
+
+    private function warnAboutPackageBalance(User $client): void
+    {
+        if ($warning = app(GetClientAccount::class)->bookingWarning($client)) {
+            $this->dispatch('notify', message: $warning, type: 'warning');
+        }
     }
 
     private function findSession(int $sessionId): TrainingSession

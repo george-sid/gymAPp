@@ -3,9 +3,9 @@
 
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-xs">
-            <div class="text-sm text-zinc-500">Σήμερα</div>
-            <div class="mt-1 text-2xl font-semibold">{{ $this->todaySessions->count() }}</div>
-            <div class="text-xs text-zinc-500">συνεδρίες</div>
+            <div class="text-sm text-zinc-500">Έσοδα μήνα</div>
+            <div class="mt-1 text-2xl font-semibold tabular-nums">{{ \Illuminate\Support\Number::currency($this->revenueThisMonth, 'EUR', 'el') }}</div>
+            <div class="text-xs text-zinc-500">πληρωμές {{ \App\Support\LocalTime::now()->translatedFormat('F') }}</div>
         </div>
         <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-xs">
             <div class="text-sm text-zinc-500">Αυτή την εβδομάδα</div>
@@ -80,6 +80,45 @@
                 </div>
             @empty
                 <p class="px-5 py-8 text-center text-sm text-zinc-500">Καμία κίνηση τις τελευταίες 7 μέρες.</p>
+            @endforelse
+        </x-ui.card>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <x-ui.card title="Πακέτα που τελειώνουν" :padding="false">
+            @forelse ($this->packagesRunningOut as $package)
+                <a href="{{ route('clients.show', ['client' => $package->client_id, 'tab' => 'packages']) }}" wire:navigate wire:key="running-out-{{ $package->id }}" class="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3 text-sm last:border-0 hover:bg-zinc-50">
+                    <div class="min-w-0">
+                        <div class="font-medium">{{ $package->client->name }}</div>
+                        <div class="truncate text-zinc-500">{{ $package->name }}</div>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <div @class(['font-medium tabular-nums', 'text-red-600' => $package->remainingSessions() === 0])>{{ $package->remainingSessions() }} {{ $package->remainingSessions() === 1 ? 'συνεδρία' : 'συνεδρίες' }}</div>
+                        @if ($package->expires_on)
+                            <div class="text-xs text-zinc-500">λήγει {{ $package->expires_on->format('d/m') }}</div>
+                        @endif
+                    </div>
+                </a>
+            @empty
+                <p class="px-5 py-8 text-center text-sm text-zinc-500">Κανένα πακέτο δεν τελειώνει σύντομα.</p>
+            @endforelse
+        </x-ui.card>
+
+        <x-ui.card title="Οφειλές" :padding="false">
+            @forelse ($this->clientsOwing as $row)
+                <a href="{{ route('clients.show', ['client' => $row['client'], 'tab' => 'packages']) }}" wire:navigate wire:key="owing-{{ $row['client']->id }}" class="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3 text-sm last:border-0 hover:bg-zinc-50">
+                    <span class="font-medium">{{ $row['client']->name }}</span>
+                    <span class="text-right">
+                        @if ($row['amount_due'] > 0)
+                            <span class="font-medium text-red-600 tabular-nums">{{ \Illuminate\Support\Number::currency($row['amount_due'], 'EUR', 'el') }}</span>
+                        @endif
+                        @if ($row['owed_sessions'] > 0)
+                            <span class="block text-xs text-zinc-500">{{ $row['owed_sessions'] }} {{ $row['owed_sessions'] === 1 ? 'συνεδρία' : 'συνεδρίες' }} χωρίς πακέτο</span>
+                        @endif
+                    </span>
+                </a>
+            @empty
+                <p class="px-5 py-8 text-center text-sm text-zinc-500">Κανείς δεν χρωστάει.</p>
             @endforelse
         </x-ui.card>
     </div>

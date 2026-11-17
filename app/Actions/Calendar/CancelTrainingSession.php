@@ -18,11 +18,12 @@ class CancelTrainingSession
     public function handle(TrainingSession $session, User $actor): TrainingSession
     {
         return DB::transaction(function () use ($session, $actor): TrainingSession {
+            // Cancel the session first so its bookings are never charged as late cancellations.
+            $session->update(['status' => TrainingSessionStatus::Cancelled]);
+
             foreach ($session->activeBookings()->get() as $booking) {
                 $this->changeBookingStatus->handle($booking, BookingStatus::Cancelled, $actor);
             }
-
-            $session->update(['status' => TrainingSessionStatus::Cancelled]);
 
             return $session;
         });

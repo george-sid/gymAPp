@@ -33,6 +33,7 @@
                     <x-nav-link :href="route('calendar')" :active="request()->routeIs('calendar')" icon="calendar">Ημερολόγιο</x-nav-link>
                     <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')" icon="users">Πελάτες</x-nav-link>
                     <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')" icon="clipboard">Προγράμματα</x-nav-link>
+                    <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.*')" icon="credit-card">Πακέτα</x-nav-link>
                     <x-nav-link :href="route('workout-plans.index')" :active="request()->routeIs('workout-plans.*')" icon="list">Προπονήσεις</x-nav-link>
                     <x-nav-link :href="route('exercises.index')" :active="request()->routeIs('exercises.*')" icon="bolt">Ασκήσεις</x-nav-link>
                     <x-nav-link :href="route('availability.index')" :active="request()->routeIs('availability.*')" icon="clock">Διαθεσιμότητα</x-nav-link>

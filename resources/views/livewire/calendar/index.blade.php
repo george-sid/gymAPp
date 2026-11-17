@@ -153,9 +153,25 @@
 
                     @forelse ($session->bookings as $booking)
                         <div wire:key="booking-{{ $booking->id }}" class="flex items-center justify-between gap-3 border-b border-zinc-100 py-2 last:border-0">
-                            <a href="{{ route('clients.show', $booking->client) }}" wire:navigate @class(['text-sm font-medium hover:text-emerald-700', 'text-zinc-400 line-through' => ! $booking->status->occupiesPlace()])>
-                                {{ $booking->client->name }}
-                            </a>
+                            <div class="min-w-0">
+                                <a href="{{ route('clients.show', $booking->client) }}" wire:navigate @class(['text-sm font-medium hover:text-emerald-700', 'text-zinc-400 line-through' => ! $booking->status->occupiesPlace()])>
+                                    {{ $booking->client->name }}
+                                </a>
+                                @if ($booking->isCharged() || $booking->charge_waived)
+                                    <div class="flex flex-wrap items-center gap-x-2 text-xs">
+                                        @if ($booking->charge_waived)
+                                            <span class="text-zinc-500">Χαρίστηκε η χρέωση</span>
+                                        @elseif ($booking->isOwed())
+                                            <span class="font-medium text-red-600">Χρωστάει συνεδρία (χωρίς πακέτο)</span>
+                                        @else
+                                            <span class="text-zinc-500">Χρεώθηκε · {{ $booking->clientPackage->name }}</span>
+                                        @endif
+                                        <button type="button" wire:click="toggleWaive({{ $booking->id }})" class="text-emerald-700 hover:underline">
+                                            {{ $booking->charge_waived ? 'Αναίρεση' : 'Χάρισμα' }}
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
                             <select
                                 wire:change="setBookingStatus({{ $booking->id }}, $event.target.value)"
                                 class="rounded-lg border border-zinc-300 py-1 pr-8 pl-2 text-sm"
@@ -189,8 +205,11 @@
                         variant="ghost"
                         class="mr-auto text-red-600 hover:bg-red-50"
                         wire:click="cancelSession"
-                        wire:confirm="Να ακυρωθεί η συνεδρία και όλες οι κρατήσεις της;"
+                        wire:confirm="Να ακυρωθεί η συνεδρία και όλες οι κρατήσεις της; Δεν χρεώνεται κανείς."
                     >Ακύρωση συνεδρίας</x-ui.button>
+                    @if ($session->bookings->contains(fn ($booking) => in_array($booking->status, [\App\Enums\BookingStatus::Pending, \App\Enums\BookingStatus::Confirmed], true)))
+                        <x-ui.button variant="secondary" icon="check" wire:click="completeAll">Όλοι ολοκλήρωσαν</x-ui.button>
+                    @endif
                 @endunless
                 <x-ui.button variant="secondary" wire:click="closeSession">Κλείσιμο</x-ui.button>
             </x-slot:footer>

@@ -1,6 +1,6 @@
 @php
     $profile = $client->clientProfile;
-    $tabs = ['details' => 'Στοιχεία', 'bookings' => 'Ραντεβού', 'workouts' => 'Προπόνηση', 'measurements' => 'Μετρήσεις'];
+    $tabs = ['details' => 'Στοιχεία', 'bookings' => 'Ραντεβού', 'packages' => 'Πακέτα & πληρωμές', 'workouts' => 'Προπόνηση', 'measurements' => 'Μετρήσεις'];
 @endphp
 
 <div>
@@ -109,7 +109,16 @@
                     <div wire:key="past-{{ $booking->id }}" class="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3 text-sm last:border-0">
                         <div>
                             <div class="font-medium">{{ $booking->trainingSession->localStartsAt()->translatedFormat('D j M Y, H:i') }}</div>
-                            <div class="text-zinc-500">{{ $booking->trainingSession->service->name }}</div>
+                            <div class="text-zinc-500">
+                                {{ $booking->trainingSession->service->name }}
+                                @if ($booking->charge_waived)
+                                    · χαρίστηκε
+                                @elseif ($booking->isOwed())
+                                    · <span class="text-red-600">χρωστάει συνεδρία</span>
+                                @elseif ($booking->isCharged())
+                                    · {{ $booking->clientPackage->name }}
+                                @endif
+                            </div>
                         </div>
                         <x-ui.badge :color="$booking->status->color()">{{ $booking->status->label() }}</x-ui.badge>
                     </div>
@@ -118,6 +127,10 @@
                 @endforelse
             </x-ui.card>
         </div>
+    @endif
+
+    @if ($tab === 'packages')
+        <livewire:clients.packages :client="$client" wire:key="packages-{{ $client->id }}" />
     @endif
 
     @if ($tab === 'measurements')

@@ -11,6 +11,7 @@ use App\Models\AvailabilityException;
 use App\Models\AvailabilityRule;
 use App\Models\Booking;
 use App\Models\CalendarEvent;
+use App\Models\ClientPackage;
 use App\Models\Service;
 use App\Models\TrainingSession;
 use App\Models\User;
@@ -236,6 +237,56 @@ class IndexTest extends TestCase
 
         $component->call('cancelSession');
         $this->assertSame(TrainingSessionStatus::Cancelled, $session->refresh()->status);
+    }
+
+    public function test_booking_a_client_without_package_balance_shows_a_warning(): void
+    {
+        $client = User::factory()->client($this->trainer)->create();
+
+        Livewire::actingAs($this->trainer)
+            ->test(Index::class)
+            ->call('openCreate', '2026-12-07T18:00:00')
+            ->set('serviceId', Service::factory()->create()->id)
+            ->set('clientId', $client->id)
+            ->call('saveSession')
+            ->assertHasNoErrors()
+            ->assertDispatched('notify', type: 'warning');
+    }
+
+    public function test_booking_a_client_with_enough_sessions_shows_no_warning(): void
+    {
+        $client = User::factory()->client($this->trainer)->create();
+        ClientPackage::factory()->for($client, 'client')->create();
+
+        Livewire::actingAs($this->trainer)
+            ->test(Index::class)
+            ->call('openCreate', now()->addDays(3)->format('Y-m-d').'T18:00:00')
+            ->set('serviceId', Service::factory()->create()->id)
+            ->set('clientId', $client->id)
+            ->call('saveSession')
+            ->assertNotDispatched('notify', type: 'warning');
+    }
+
+    public function test_complete_all_charges_each_booked_client_and_charge_can_be_waived(): void
+    {
+        $session = TrainingSession::factory()->for($this->trainer, 'trainer')->group(3)->at(now()->subDay()->format('Y-m-d').' 10:00')->create();
+        $client = User::factory()->client($this->trainer)->create();
+        $package = ClientPackage::factory()->for($client, 'client')->create();
+        $booking = Booking::factory()->for($session)->for($client, 'client')->create();
+        Booking::factory()->for($session)->create();
+
+        $component = Livewire::actingAs($this->trainer)
+            ->test(Index::class)
+            ->call('openSession', $session->id)
+            ->call('completeAll');
+
+        $this->assertSame(0, $session->bookings()->where('status', BookingStatus::Confirmed)->count());
+        $this->assertSame(9, $package->remainingSessions());
+
+        $component->call('toggleWaive', $booking->id);
+
+        $this->assertSame(10, $package->remainingSessions());
+        $this->assertTrue($booking->refresh()->charge_waived);
     }
 
     public function test_full_session_reports_error_when_adding_client(): void

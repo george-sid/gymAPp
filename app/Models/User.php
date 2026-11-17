@@ -60,6 +60,22 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<ClientPackage, $this>
+     */
+    public function clientPackages(): HasMany
+    {
+        return $this->hasMany(ClientPackage::class, 'client_id');
+    }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'client_id');
+    }
+
+    /**
      * Clients the given staff member is allowed to see.
      *
      * @param  Builder<User>  $query

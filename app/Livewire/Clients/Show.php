@@ -55,7 +55,7 @@ class Show extends Component
     {
         return $this->client->bookings()
             ->whereHas('trainingSession', fn (Builder $query) => $query->where('starts_at', '<', now()))
-            ->with('trainingSession.service')
+            ->with(['trainingSession.service', 'clientPackage'])
             ->get()
             ->sortByDesc('trainingSession.starts_at')
             ->take(50)

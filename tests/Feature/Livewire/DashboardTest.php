@@ -8,6 +8,8 @@ use App\Enums\BookingStatus;
 use App\Livewire\Dashboard;
 use App\Models\AvailabilityRule;
 use App\Models\Booking;
+use App\Models\ClientPackage;
+use App\Models\Payment;
 use App\Models\Service;
 use App\Models\TrainingSession;
 use App\Models\User;
@@ -74,6 +76,27 @@ class DashboardTest extends TestCase
     public function test_occupancy_is_empty_without_working_hours(): void
     {
         $this->assertNull(Livewire::actingAs($this->trainer)->test(Dashboard::class)->instance()->week['occupancy']);
+    }
+
+    public function test_shows_revenue_running_out_packages_and_debts(): void
+    {
+        $maria = User::factory()->client($this->trainer)->create(['name' => 'Μαρία']);
+        $nikos = User::factory()->client($this->trainer)->create(['name' => 'Νίκος']);
+        $paid = User::factory()->client($this->trainer)->create(['name' => 'Εξοφλημένος']);
+
+        $mariaPackage = ClientPackage::factory()->for($maria, 'client')->sessions(1)->create(['price' => 300, 'expires_on' => '2027-02-01']);
+        Payment::factory()->for($maria, 'client')->create(['client_package_id' => $mariaPackage->id, 'amount' => 100, 'paid_on' => '2026-12-02']);
+        Payment::factory()->for($paid, 'client')->create(['amount' => 50, 'paid_on' => '2026-11-30']);
+        ClientPackage::factory()->for($paid, 'client')->create(['price' => 50, 'expires_on' => '2027-02-01']);
+        Booking::factory()->for(TrainingSession::factory()->at('2026-12-01 10:00'))->for($nikos, 'client')->status(BookingStatus::Completed)->create(['charged_at' => now()]);
+
+        $component = Livewire::actingAs($this->trainer)->test(Dashboard::class);
+
+        $this->assertSame(100.0, $component->instance()->revenueThisMonth);
+        $this->assertSame([$mariaPackage->id], $component->instance()->packagesRunningOut->modelKeys());
+
+        $owing = $component->instance()->clientsOwing->mapWithKeys(fn (array $row) => [$row['client']->name => [$row['amount_due'], $row['owed_sessions']]])->all();
+        $this->assertSame(['Μαρία' => [200.0, 0], 'Νίκος' => [0.0, 1]], $owing);
     }
 
     public function test_recent_activity_shows_new_bookings_and_cancellations(): void

@@ -8,6 +8,7 @@ use App\Livewire\Calendar;
 use App\Livewire\Clients;
 use App\Livewire\Dashboard;
 use App\Livewire\Exercises;
+use App\Livewire\Packages;
 use App\Livewire\Services;
 use App\Livewire\Settings;
 use App\Livewire\WorkoutPlans;
@@ -31,6 +32,7 @@ Route::middleware(['auth', 'staff'])->group(function () {
     Route::get('/measurement-photos/{photo}', MeasurementPhotoController::class)->name('measurement-photos.show');
 
     Route::livewire('/services', Services\Index::class)->name('services.index');
+    Route::livewire('/packages', Packages\Index::class)->name('packages.index');
 
     Route::livewire('/exercises', Exercises\Index::class)->name('exercises.index');
 
